@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ChevronDown, Shield, Terminal } from "lucide-react";
 
 const roles = [
-  "Cybersecurity Enthusiast",
+  "Cybersecurity Student",
   "CTF Player",
   "Ethical Hacker",
   "Security Researcher",
