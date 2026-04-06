@@ -9,6 +9,21 @@ export interface TryHackMeProfile {
   completedPercentage: number;
 }
 
+/** Shape of the TryHackMe public user API response (best-effort). */
+interface TryHackMeApiResponse {
+  rank?: string;
+  userRank?: string;
+  points?: number | string;
+  totalPoints?: number | string;
+  completedRooms?: number | string;
+  roomsCompleted?: number | string;
+  badges?: number | string;
+  badgesEarned?: number | string;
+  streak?: number | string;
+  level?: number | string;
+  completedPercentage?: number | string;
+}
+
 const FALLBACK: TryHackMeProfile = {
   username: "mrhamad",
   rank: "Hacker",
@@ -24,43 +39,28 @@ export async function getTryHackMeProfile(
   username: string
 ): Promise<TryHackMeProfile> {
   try {
-    const res = await fetch(
-      `https://tryhackme.com/api/user/exist/${username}`,
-      {
-        next: { revalidate: 3600 },
-      }
-    );
+    const res = await fetch(`https://tryhackme.com/api/user/${username}`, {
+      next: { revalidate: 3600 },
+    });
 
     if (!res.ok) return { ...FALLBACK, username };
 
-    // The /exist endpoint only confirms user existence.
-    // Attempt the public stats endpoint as well.
-    const statsRes = await fetch(
-      `https://tryhackme.com/api/user/${username}`,
-      {
-        next: { revalidate: 3600 },
-      }
-    );
-
-    if (!statsRes.ok) return { ...FALLBACK, username };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: any = await statsRes.json();
+    const data: TryHackMeApiResponse = await res.json();
 
     return {
       username,
-      rank: data?.rank ?? data?.userRank ?? FALLBACK.rank,
-      points: Number(data?.points ?? data?.totalPoints ?? FALLBACK.points),
+      rank: data.rank ?? data.userRank ?? FALLBACK.rank,
+      points: Number(data.points ?? data.totalPoints ?? FALLBACK.points),
       roomsCompleted: Number(
-        data?.completedRooms ?? data?.roomsCompleted ?? FALLBACK.roomsCompleted
+        data.completedRooms ?? data.roomsCompleted ?? FALLBACK.roomsCompleted
       ),
       badgesEarned: Number(
-        data?.badges ?? data?.badgesEarned ?? FALLBACK.badgesEarned
+        data.badges ?? data.badgesEarned ?? FALLBACK.badgesEarned
       ),
-      streak: Number(data?.streak ?? FALLBACK.streak),
-      level: Number(data?.level ?? FALLBACK.level),
+      streak: Number(data.streak ?? FALLBACK.streak),
+      level: Number(data.level ?? FALLBACK.level),
       completedPercentage: Number(
-        data?.completedPercentage ?? FALLBACK.completedPercentage
+        data.completedPercentage ?? FALLBACK.completedPercentage
       ),
     };
   } catch {
