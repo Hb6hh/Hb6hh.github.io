@@ -28,18 +28,6 @@ const certifications = [
     skills: ["Risk Management", "Cryptography", "Identity Management", "Network Security"],
     link: "#",
   },
-  {
-    name: "TryHackMe — Pre Security",
-    issuer: "TryHackMe",
-    date: "2024",
-    status: "Completed",
-    color: "text-yellow-400",
-    bg: "bg-yellow-400/10 border-yellow-400/30",
-    description:
-      "Hands-on cybersecurity training covering Linux fundamentals, networking, web fundamentals, and basic security concepts.",
-    skills: ["Linux", "Networking", "Web Fundamentals", "OSINT"],
-    link: "#",
-  },
 ];
 
 export default function CertificationsSection() {
