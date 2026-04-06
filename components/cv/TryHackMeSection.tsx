@@ -1,14 +1,28 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Trophy, Zap, Award, Flame, Target, ExternalLink } from "lucide-react";
 import type { TryHackMeProfile } from "@/lib/tryhackme";
+import { TRYHACKME_FALLBACK } from "@/lib/tryhackme";
 
-interface Props {
-  profile: TryHackMeProfile;
-}
+const USERNAME = "mrhamad";
 
-export default function TryHackMeSection({ profile }: Props) {
+export default function TryHackMeSection() {
+  const [profile, setProfile] = useState<TryHackMeProfile>(TRYHACKME_FALLBACK);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/tryhackme?username=${USERNAME}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("API error");
+        return res.json();
+      })
+      .then((data: TryHackMeProfile) => setProfile(data))
+      .catch(() => setProfile(TRYHACKME_FALLBACK))
+      .finally(() => setLoading(false));
+  }, []);
+
   const stats = [
     {
       value: profile.points.toLocaleString(),
@@ -66,6 +80,11 @@ export default function TryHackMeSection({ profile }: Props) {
           <p className="font-mono text-primary text-xs mb-3 tracking-widest uppercase">
             <span className="text-primary">$</span> ./tryhackme --profile{" "}
             {profile.username}
+            {loading && (
+              <span className="ml-2 text-muted-foreground animate-pulse">
+                fetching...
+              </span>
+            )}
           </p>
           <h2 className="text-4xl md:text-5xl font-black">
             TryHackMe <span className="text-primary">Stats</span>
