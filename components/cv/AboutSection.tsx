@@ -52,7 +52,7 @@ export default function AboutSection() {
             </div>
             <div>
               <h3 className="text-xl font-black text-foreground">Hamad Yazid</h3>
-              <p className="text-muted-foreground text-sm font-mono">Cybersecurity Enthusiast</p>
+              <p className="text-muted-foreground text-sm font-mono">Cybersecurity Student</p>
             </div>
           </div>
 
@@ -101,7 +101,9 @@ export default function AboutSection() {
               <Github className="w-4 h-4" /> GitHub
             </a>
             <a
-              href="#"
+              href="https://www.linkedin.com/in/%D8%AD%D9%85%D8%AF-%D9%8A%D8%B2%D9%8A%D8%AF-372078366/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2 border border-border text-muted-foreground hover:text-accent hover:border-accent/50 text-xs font-mono px-3 py-2 rounded transition-all"
             >
               <Linkedin className="w-4 h-4" /> LinkedIn
