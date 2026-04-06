@@ -11,13 +11,13 @@ export interface TryHackMeProfile {
 
 const FALLBACK: TryHackMeProfile = {
   username: "mrhamad",
-  rank: "Hacker",
-  points: 0,
-  roomsCompleted: 0,
-  badgesEarned: 0,
-  streak: 0,
-  level: 1,
-  completedPercentage: 0,
+  rank: "student",
+  points:119769 ,
+  roomsCompleted: 91,
+  badgesEarned: 17,
+  streak: 1,
+  level: 9,
+  
 };
 
 export async function getTryHackMeProfile(
