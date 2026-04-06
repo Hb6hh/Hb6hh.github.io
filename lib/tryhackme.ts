@@ -11,27 +11,25 @@ export interface TryHackMeProfile {
 
 const FALLBACK: TryHackMeProfile = {
   username: "mrhamad",
-  rank: "student",
-  points:119769 ,
+  rank: "119767",
+  points: 8471,
   roomsCompleted: 91,
   badgesEarned: 17,
   streak: 1,
-  level: 9,
-  
+  level: 8,
+  completedPercentage: 45,
 };
 
 export async function getTryHackMeProfile(
   username: string
 ): Promise<TryHackMeProfile> {
   try {
-    // Call the local API route instead of TryHackMe API directly
-    // This runs on Vercel's servers, bypassing firewall restrictions
     const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}` 
       : 'http://localhost:3000';
     
     const res = await fetch(`${baseUrl}/api/tryhackme`, {
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) return { ...FALLBACK, username };
