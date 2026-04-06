@@ -2,56 +2,52 @@
 
 import { motion } from "framer-motion";
 import { Trophy, Zap, Award, Flame, Target, ExternalLink } from "lucide-react";
-import type { TryHackMeProfile } from "@/lib/tryhackme";
 
-interface Props {
-  profile: TryHackMeProfile;
-}
+const profile = {
+  username: "mrhamad",
+  rank: "119767",
+  points: 8471,
+  roomsCompleted: 91,
+  badgesEarned: 17,
+  streak: 1,
+  level: 8,
+  completedPercentage: 45,
+};
 
-export default function TryHackMeSection({ profile }: Props) {
-  const stats = [
-    {
-      value: profile.points.toLocaleString(),
-      label: "Total Points",
-      icon: Zap,
-      color: "text-primary",
-      border: "border-primary/30 bg-primary/10",
-    },
-    {
-      value: String(profile.roomsCompleted),
-      label: "Rooms Completed",
-      icon: Target,
-      color: "text-accent",
-      border: "border-accent/30 bg-accent/10",
-    },
-    {
-      value: String(profile.badgesEarned),
-      label: "Badges Earned",
-      icon: Award,
-      color: "text-yellow-400",
-      border: "border-yellow-400/30 bg-yellow-400/10",
-    },
-    {
-      value: profile.streak > 0 ? `${profile.streak}d` : "—",
-      label: "Current Streak",
-      icon: Flame,
-      color: "text-orange-400",
-      border: "border-orange-400/30 bg-orange-400/10",
-    },
-  ];
+const stats = [
+  {
+    value: profile.points.toLocaleString(),
+    label: "Total Points",
+    icon: Zap,
+    color: "text-primary",
+    border: "border-primary/30 bg-primary/10",
+  },
+  {
+    value: String(profile.roomsCompleted),
+    label: "Rooms Completed",
+    icon: Target,
+    color: "text-accent",
+    border: "border-accent/30 bg-accent/10",
+  },
+  {
+    value: String(profile.badgesEarned),
+    label: "Badges Earned",
+    icon: Award,
+    color: "text-yellow-400",
+    border: "border-yellow-400/30 bg-yellow-400/10",
+  },
+  {
+    value: profile.streak > 0 ? `${profile.streak}d` : "—",
+    label: "Current Streak",
+    icon: Flame,
+    color: "text-orange-400",
+    border: "border-orange-400/30 bg-orange-400/10",
+  },
+];
 
-  // Use the API's completedPercentage when available.
-  // If the API returns 0 (unavailable), approximate using roomsCompleted
-  // capped at 99 so the bar never falsely shows 100% completion.
-  const progressPct = Math.min(
-    100,
-    profile.completedPercentage > 0
-      ? profile.completedPercentage
-      : profile.roomsCompleted > 0
-      ? Math.min(99, profile.roomsCompleted)
-      : 0
-  );
+const progressPct = Math.min(100, Math.max(0, profile.completedPercentage));
 
+export default function TryHackMeSection() {
   return (
     <section id="tryhackme" className="py-24 px-4 md:px-8">
       <div className="max-w-6xl mx-auto">
@@ -131,27 +127,25 @@ export default function TryHackMeSection({ profile }: Props) {
           </div>
 
           {/* Progress bar */}
-          {progressPct > 0 && (
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
-                  Completion Progress
-                </span>
-                <span className="font-mono text-xs text-primary">
-                  {progressPct}%
-                </span>
-              </div>
-              <div className="w-full h-2 bg-border rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  whileInView={{ width: `${progressPct}%` }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.4, ease: "easeOut", delay: 0.3 }}
-                  className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
-                />
-              </div>
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
+                Completion Progress
+              </span>
+              <span className="font-mono text-xs text-primary">
+                {progressPct}%
+              </span>
             </div>
-          )}
+            <div className="w-full h-2 bg-border rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                whileInView={{ width: `${progressPct}%` }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.4, ease: "easeOut", delay: 0.3 }}
+                className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
+              />
+            </div>
+          </div>
 
           {/* Highlights */}
           <div className="mb-8">
