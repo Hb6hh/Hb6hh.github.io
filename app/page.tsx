@@ -4,12 +4,8 @@ import AboutSection from "@/components/cv/AboutSection";
 import SkillsSection from "@/components/cv/SkillsSection";
 import CertificationsSection from "@/components/cv/CertificationsSection";
 import CTFSection from "@/components/cv/CTFSection";
-import TryHackMeSection from "@/components/cv/TryHackMeSection";
-import { getTryHackMeProfile } from "@/lib/tryhackme";
 
-export default async function Home() {
-  const thmProfile = await getTryHackMeProfile("mrhamad");
-
+export default function Home() {
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
       <div className="scan-line" />
@@ -19,7 +15,6 @@ export default async function Home() {
       <SkillsSection />
       <CertificationsSection />
       <CTFSection />
-      <TryHackMeSection profile={thmProfile} />
       <footer className="text-center py-10 text-muted-foreground font-mono text-xs border-t border-border mt-10 z-10 relative">
         <span className="text-primary">root@hamad</span>
         <span className="text-muted-foreground">:~# </span>
