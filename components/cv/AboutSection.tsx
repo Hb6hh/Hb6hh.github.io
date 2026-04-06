@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { User, MapPin, Mail, Github, Linkedin } from "lucide-react";
+import { MapPin, Mail, Github, Linkedin, Phone } from "lucide-react";
+import Image from "next/image";
 
 const facts = [
   { icon: "🎯", label: "Focus", value: "Cybersecurity & Ethical Hacking" },
@@ -39,8 +40,14 @@ export default function AboutSection() {
           transition={{ duration: 0.6, delay: 0.1 }}
         >
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center flex-shrink-0">
-              <User className="w-8 h-8 text-primary" />
+            <div className="w-16 h-16 rounded-2xl overflow-hidden border border-primary/30 flex-shrink-0">
+              <Image
+                src="/images/profile.png"
+                alt="Hamad Yazid profile photo"
+                width={64}
+                height={64}
+                className="w-full h-full object-cover"
+              />
             </div>
             <div>
               <h3 className="text-xl font-black text-foreground">Hamad Yazid</h3>
@@ -73,6 +80,13 @@ export default function AboutSection() {
             >
               <Mail className="w-4 h-4 text-primary" />
               contact@hamadyazid.me
+            </a>
+            <a
+              href="tel:0556055942"
+              className="flex items-center gap-2 text-muted-foreground hover:text-primary text-sm font-mono transition-colors"
+            >
+              <Phone className="w-4 h-4 text-primary" />
+              0556055942
             </a>
           </div>
 
