@@ -65,8 +65,9 @@ export default function CertificationsSection() {
       {/* Cards */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {certifications.map((cert, i) => (
-          <motion.div
+          <motion.article
             key={cert.name}
+            aria-label={`${cert.name} — ${cert.issuer}`}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -132,7 +133,7 @@ export default function CertificationsSection() {
                 View Certificate
               </a>
             )}
-          </motion.div>
+          </motion.article>
         ))}
       </div>
     </section>
