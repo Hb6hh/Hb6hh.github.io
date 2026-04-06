@@ -40,6 +40,8 @@ export async function getTryHackMeProfile(
 ): Promise<TryHackMeProfile> {
   try {
     const res = await fetch(`https://tryhackme.com/api/user/${username}`, {
+      // Cache for 1 hour; TryHackMe public stats don't change frequently
+      // and aggressive fetching could hit rate limits.
       next: { revalidate: 3600 },
     });
 

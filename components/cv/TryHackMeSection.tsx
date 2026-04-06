@@ -40,6 +40,9 @@ export default function TryHackMeSection({ profile }: Props) {
     },
   ];
 
+  // Use the API's completedPercentage when available.
+  // If the API returns 0 (unavailable), approximate using roomsCompleted
+  // capped at 99 so the bar never falsely shows 100% completion.
   const progressPct = Math.min(
     100,
     profile.completedPercentage > 0
