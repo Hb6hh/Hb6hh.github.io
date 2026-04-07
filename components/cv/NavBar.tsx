@@ -8,6 +8,7 @@ const navLinks = [
   { label: "Skills", href: "#skills" },
   { label: "Certs", href: "#certifications" },
   { label: "CTF", href: "#ctf" },
+  { label: "THM", href: "#tryhackme" },
 ];
 
 export default function NavBar() {
