@@ -4,6 +4,7 @@ import AboutSection from "@/components/cv/AboutSection";
 import SkillsSection from "@/components/cv/SkillsSection";
 import CertificationsSection from "@/components/cv/CertificationsSection";
 import CTFSection from "@/components/cv/CTFSection";
+import TryHackMeSection from "@/components/cv/TryHackMeSection";
 
 export default async function Home() {
   return (
@@ -15,6 +16,7 @@ export default async function Home() {
       <SkillsSection />
       <CertificationsSection />
       <CTFSection />
+      <TryHackMeSection />
       <footer className="text-center py-10 text-muted-foreground font-mono text-xs border-t border-border mt-10 z-10 relative">
         <span className="text-primary">root@hamad</span>
         <span className="text-muted-foreground">:~# </span>
