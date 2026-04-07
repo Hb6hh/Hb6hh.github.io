@@ -31,7 +31,7 @@ const certifications = [
 
 {
   name: "Fundamentals of Programming & Problem Solving",
-  issuer: "TryHackMe",
+  issuer: "codezilla",
   date: "In Progress",
   status: "In Progress",
   color: "text-accent",
@@ -84,6 +84,30 @@ const certifications = [
   skills: ["SOC", "Alert Triage", "Incident Response"],
   link: "#",
 },  
+  {
+  name: "Claude Code in Action",
+  issuer: "Anthropic",
+  date: "In Progress",
+  status: "In Progress",
+  color: "text-accent",
+  bg: "bg-accent/10 border-accent/30",
+  description:
+    "In progress: hands-on certificate focused on using Claude in real workflows for building and coding tasks.",
+  skills: ["Claude", "LLMs", "Developer Tools"],
+  link: "#",
+},
+{
+  name: "Claude 101",
+  issuer: "Anthropic",
+  date: "In Progress",
+  status: "In Progress",
+  color: "text-accent",
+  bg: "bg-accent/10 border-accent/30",
+  description:
+    "In progress: introductory certificate covering the basics of Claude and safe, effective usage.",
+  skills: ["Claude", "Prompting", "AI Basics"],
+  link: "#",
+},
 ];
 
 export default function CertificationsSection() {
