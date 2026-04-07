@@ -76,11 +76,11 @@ export default function AboutSection() {
               <span>Somewhere on the internet</span>
             </div>
             <a
-              href="mailto:contact@hamadyazid.me"
+              href="mailto:hamadyazid667@gmail.com"
               className="flex items-center gap-2 text-muted-foreground hover:text-primary text-sm font-mono transition-colors"
             >
               <Mail className="w-4 h-4 text-primary" />
-              contact@hamadyazid.me
+              hamadyazid667@gmail.com
             </a>
             <a
               href="tel:0556055942"
