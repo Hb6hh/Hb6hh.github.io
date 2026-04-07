@@ -1,145 +1,140 @@
+import { chromium } from "playwright";
 import fs from "node:fs/promises";
 import path from "node:path";
-import * as cheerio from "cheerio";
 
 const PROFILE_URL = "https://tryhackme.com/p/mrhamad";
 
 function toNumber(v) {
   if (v == null) return null;
-  if (typeof v === "number" && Number.isFinite(v)) return v;
-  const s = String(v).replace(/,/g, "");
-  const m = s.match(/-?\d+(\.\d+)?/);
-  return m ? Number(m[0]) : null;
+  const s = String(v).replace(/,/g, "").trim();
+  const m = s.match(/^(\d+)/);
+  return m ? parseInt(m[1], 10) : null;
 }
 
-function deepFind(obj, predicate) {
-  const out = [];
-  const seen = new Set();
+/**
+ * Scans the rendered DOM for a stat card whose label exactly matches
+ * `labelText` and returns the numeric value displayed in that card.
+ *
+ * Strategy: walk every text node in the page body looking for one whose
+ * trimmed content equals the label. Once found, climb up the DOM (up to
+ * MAX_DEPTH levels) and at each level scan all sibling leaf-elements for a
+ * value that consists solely of digits (with optional commas). The first
+ * match wins.
+ */
+async function extractStatByLabel(page, labelText) {
+  return page.evaluate((label) => {
+    const MAX_DEPTH = 6;
 
-  function walk(v, pathArr) {
-    if (v && typeof v === "object") {
-      if (seen.has(v)) return;
-      seen.add(v);
+    function isNumericText(t) {
+      return t != null && /^\d[\d,]*$/.test(t.trim());
+    }
 
-      if (predicate(v, pathArr)) out.push({ value: v, path: pathArr });
+    function findNumberInSubtree(root) {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+      while (walker.nextNode()) {
+        const t = walker.currentNode.textContent?.trim();
+        if (isNumericText(t)) return t;
+      }
+      return null;
+    }
 
-      if (Array.isArray(v)) {
-        for (let i = 0; i < v.length; i++) walk(v[i], pathArr.concat([String(i)]));
-      } else {
-        for (const [k, val] of Object.entries(v)) walk(val, pathArr.concat([k]));
+    // Collect all text nodes whose trimmed content equals the label
+    const labelNodes = [];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+    while (walker.nextNode()) {
+      if (walker.currentNode.textContent?.trim() === label) {
+        labelNodes.push(walker.currentNode);
       }
     }
-  }
 
-  walk(obj, []);
-  return out;
-}
-
-function findFirstNumberByKeyLike(root, keyRegex) {
-  // finds objects that have keys matching keyRegex and value is number-like
-  const hits = deepFind(root, (v) => v && typeof v === "object" && !Array.isArray(v));
-  for (const h of hits) {
-    for (const [k, val] of Object.entries(h.value)) {
-      if (keyRegex.test(k)) {
-        const n = toNumber(val);
-        if (n != null) return n;
+    for (const labelNode of labelNodes) {
+      let container = labelNode.parentElement;
+      for (let depth = 0; depth < MAX_DEPTH && container; depth++) {
+        const num = findNumberInSubtree(container);
+        if (num !== null) return num;
+        container = container.parentElement;
       }
     }
-  }
-  return null;
+
+    return null;
+  }, labelText);
 }
 
 async function main() {
-  const res = await fetch(PROFILE_URL, {
-    headers: {
-      "user-agent":
-        "Mozilla/5.0 (compatible; Hb6hh.github.io bot; +https://github.com/Hb6hh/Hb6hh.github.io)",
-      accept: "text/html",
-    },
+  console.log("Launching Chromium...");
+  const browser = await chromium.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
-  if (!res.ok) throw new Error(`Failed to fetch profile: ${res.status} ${res.statusText}`);
-  const html = await res.text();
-  const $ = cheerio.load(html);
+  try {
+    const page = await browser.newPage();
+    page.setDefaultTimeout(60_000);
 
-  // Collect JSON candidates from script tags
-  const jsonCandidates = [];
-  $("script").each((_, el) => {
-    const text = $(el).text()?.trim();
-    if (!text) return;
+    console.log(`Navigating to ${PROFILE_URL} ...`);
+    await page.goto(PROFILE_URL, { waitUntil: "domcontentloaded" });
 
-    // only take reasonably sized blobs (avoid huge chunks if you want)
-    if (text.startsWith("{") || text.startsWith("[")) {
-      jsonCandidates.push(text);
+    // Wait until at least the "Rank" label has been rendered by the React app
+    await page
+      .waitForFunction(() => document.body.innerText.includes("Rank"), { timeout: 30_000 })
+      .catch(() => {
+        console.warn('Timed out waiting for "Rank" text – proceeding anyway');
+      });
+
+    // Small grace period for remaining cards to hydrate
+    await page.waitForTimeout(2_000);
+
+    const [rankRaw, badgesRaw, completedRoomsRaw, pointsRaw] = await Promise.all([
+      extractStatByLabel(page, "Rank"),
+      extractStatByLabel(page, "Badges"),
+      extractStatByLabel(page, "Completed rooms"),
+      extractStatByLabel(page, "Points"),
+    ]);
+
+    console.log("Raw extracted values →", { rankRaw, badgesRaw, completedRoomsRaw, pointsRaw });
+
+    const rank = toNumber(rankRaw);
+    const badges = toNumber(badgesRaw);
+    const completed_rooms = toNumber(completedRoomsRaw);
+    const points = toNumber(pointsRaw);
+
+    // Fail loudly if required stats are missing so the workflow doesn't
+    // silently commit a JSON full of nulls.
+    const missing = [];
+    if (rank === null) missing.push("rank");
+    if (badges === null) missing.push("badges");
+    if (completed_rooms === null) missing.push("completed_rooms");
+
+    if (missing.length > 0) {
+      const screenshotPath = "/tmp/thm-debug.png";
+      await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => {});
+      throw new Error(
+        `Could not extract required stats: ${missing.join(", ")}.\n` +
+          `Debug screenshot saved to ${screenshotPath}.\n` +
+          "TryHackMe may have changed its page structure – update the label strings in the script."
+      );
     }
 
-    // also capture assignment blobs like: window.__SOMETHING__ = {...}
-    const assignMatch = text.match(/=\s*({[\s\S]*})\s*;?\s*$/);
-    if (assignMatch) jsonCandidates.push(assignMatch[1]);
-  });
+    const data = {
+      username: "mrhamad",
+      profile_url: PROFILE_URL,
+      rank,
+      badges,
+      completed_rooms,
+      points,
+      updated_at: new Date().toISOString(),
+    };
 
-  let best = null;
-
-  for (const cand of jsonCandidates) {
-    try {
-      const parsed = JSON.parse(cand);
-
-      // We prefer parsed blobs that contain multiple expected concepts
-      const asString = JSON.stringify(parsed).toLowerCase();
-      const score =
-        (asString.includes("rank") ? 1 : 0) +
-        (asString.includes("badge") ? 1 : 0) +
-        (asString.includes("room") ? 1 : 0) +
-        (asString.includes("point") ? 1 : 0);
-
-      if (!best || score > best.score) best = { parsed, score };
-    } catch {
-      // ignore
-    }
-  }
-
-  // If no JSON found, fail loudly so we can adjust
-  if (!best) {
-    throw new Error(
-      "Could not find embedded JSON on TryHackMe profile page. Page may be heavily client-rendered."
+    await fs.mkdir("public", { recursive: true });
+    await fs.writeFile(
+      path.join("public", "tryhackme.json"),
+      JSON.stringify(data, null, 2) + "\n",
+      "utf8"
     );
+
+    console.log("Updated public/tryhackme.json →", data);
+  } finally {
+    await browser.close();
   }
-
-  const root = best.parsed;
-
-  // Try a few key patterns (TryHackMe may name them differently)
-  const rank =
-    findFirstNumberByKeyLike(root, /rank/i) ??
-    findFirstNumberByKeyLike(root, /leaderboard/i);
-
-  const badges = findFirstNumberByKeyLike(root, /badges?/i);
-
-  const completed_rooms =
-    findFirstNumberByKeyLike(root, /completed.*rooms?/i) ??
-    findFirstNumberByKeyLike(root, /rooms?.*completed/i);
-
-  const points =
-    findFirstNumberByKeyLike(root, /points?/i) ??
-    findFirstNumberByKeyLike(root, /score/i);
-
-  const data = {
-    username: "mrhamad",
-    profile_url: PROFILE_URL,
-    rank,
-    badges,
-    completed_rooms,
-    points,
-    updated_at: new Date().toISOString(),
-  };
-
-  await fs.mkdir("public", { recursive: true });
-  await fs.writeFile(
-    path.join("public", "tryhackme.json"),
-    JSON.stringify(data, null, 2) + "\n",
-    "utf8"
-  );
-
-  console.log("Updated public/tryhackme.json", data);
 }
 
 main().catch((e) => {

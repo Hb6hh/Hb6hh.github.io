@@ -11,17 +11,18 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
 
-      - name: Install deps
-        run: npm i --no-save cheerio
+      - name: Install script dependencies
+        run: npm i --no-save playwright
+
+      - name: Install Playwright browser + OS dependencies
+        run: npx playwright install --with-deps chromium
 
       - name: Update stats JSON
         run: node scripts/update-tryhackme.mjs
