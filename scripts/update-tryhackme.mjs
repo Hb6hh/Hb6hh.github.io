@@ -17,47 +17,76 @@ function toNumber(v) {
  *
  * Strategy: walk every text node in the page body looking for one whose
  * trimmed content equals the label. Once found, climb up the DOM (up to
- * MAX_DEPTH levels) and at each level scan all sibling leaf-elements for a
- * value that consists solely of digits (with optional commas). The first
- * match wins.
+ * MAX_DEPTH levels) and at each level collect all candidate numeric text
+ * nodes. When `skipPercentage` is true, any numeric node whose immediate
+ * parent element contains "%" or the word "top" is excluded (this prevents
+ * the "top X%" badge from being read as the rank). The largest remaining
+ * number is returned in that mode; otherwise the first match wins.
  */
-async function extractStatByLabel(page, labelText) {
-  return page.evaluate((label) => {
-    const MAX_DEPTH = 6;
+async function extractStatByLabel(page, labelText, { skipPercentage = false } = {}) {
+  return page.evaluate(
+    ({ label, skipPercentage }) => {
+      const MAX_DEPTH = 6;
 
-    function isNumericText(t) {
-      return t != null && /^\d[\d,]*$/.test(t.trim());
-    }
+      function isNumericText(t) {
+        return t != null && /^\d[\d,]*$/.test(t.trim());
+      }
 
-    function findNumberInSubtree(root) {
-      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+      /** Returns true when a numeric text node is part of a "top X%" display. */
+      function isPercentageContext(textNode) {
+        const parent = textNode.parentElement;
+        if (!parent) return false;
+        const parentText = parent.textContent || "";
+        // Direct parent contains "%" → this number is a percentage value
+        if (parentText.includes("%")) return true;
+        // Direct parent contains "top" (e.g. "top 6") → percentage badge context
+        if (/\btop\b/i.test(parentText)) return true;
+        // Next sibling starts with "%" (e.g. <span>6</span><span>%</span>)
+        const next = textNode.nextSibling;
+        if (next && (next.textContent || "").trimStart().startsWith("%")) return true;
+        return false;
+      }
+
+      function findNumbersInSubtree(root) {
+        const nums = [];
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+        while (walker.nextNode()) {
+          const t = walker.currentNode.textContent?.trim();
+          if (!isNumericText(t)) continue;
+          if (skipPercentage && isPercentageContext(walker.currentNode)) continue;
+          nums.push(t.replace(/,/g, ""));
+        }
+        return nums;
+      }
+
+      // Collect all text nodes whose trimmed content equals the label
+      const labelNodes = [];
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
       while (walker.nextNode()) {
-        const t = walker.currentNode.textContent?.trim();
-        if (isNumericText(t)) return t;
+        if (walker.currentNode.textContent?.trim() === label) {
+          labelNodes.push(walker.currentNode);
+        }
       }
+
+      for (const labelNode of labelNodes) {
+        let container = labelNode.parentElement;
+        for (let depth = 0; depth < MAX_DEPTH && container; depth++) {
+          const nums = findNumbersInSubtree(container);
+          if (nums.length > 0) {
+            if (skipPercentage) {
+              // Return the largest integer (the actual rank, not a "top X%" badge)
+              return String(nums.reduce((max, n) => Math.max(max, Number(n)), -Infinity));
+            }
+            return nums[0];
+          }
+          container = container.parentElement;
+        }
+      }
+
       return null;
-    }
-
-    // Collect all text nodes whose trimmed content equals the label
-    const labelNodes = [];
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-    while (walker.nextNode()) {
-      if (walker.currentNode.textContent?.trim() === label) {
-        labelNodes.push(walker.currentNode);
-      }
-    }
-
-    for (const labelNode of labelNodes) {
-      let container = labelNode.parentElement;
-      for (let depth = 0; depth < MAX_DEPTH && container; depth++) {
-        const num = findNumberInSubtree(container);
-        if (num !== null) return num;
-        container = container.parentElement;
-      }
-    }
-
-    return null;
-  }, labelText);
+    },
+    { label: labelText, skipPercentage }
+  );
 }
 
 async function main() {
@@ -84,7 +113,8 @@ async function main() {
     await page.waitForTimeout(2_000);
 
     const [rankRaw, badgesRaw, completedRoomsRaw, pointsRaw] = await Promise.all([
-      extractStatByLabel(page, "Rank"),
+      // skipPercentage: true prevents the "top X%" badge from being read as the rank
+      extractStatByLabel(page, "Rank", { skipPercentage: true }),
       extractStatByLabel(page, "Badges"),
       extractStatByLabel(page, "Completed rooms"),
       extractStatByLabel(page, "Points"),
@@ -103,6 +133,13 @@ async function main() {
     if (rank === null) missing.push("rank");
     if (badges === null) missing.push("badges");
     if (completed_rooms === null) missing.push("completed_rooms");
+
+    // Regression guard: a real rank is a large integer (typically in the tens
+    // of thousands or more). If we end up with a tiny number (≤ 1000) it almost
+    // certainly means we read a "top X%" badge instead of the actual rank.
+    if (rank !== null && rank <= 1000) {
+      missing.push(`rank plausibility (got ${rank}, expected > 1000 – likely read "top X%" instead of actual rank)`);
+    }
 
     if (missing.length > 0) {
       const screenshotPath = "/tmp/thm-debug.png";
