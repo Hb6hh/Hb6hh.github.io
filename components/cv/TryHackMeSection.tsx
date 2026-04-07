@@ -13,6 +13,8 @@ type ThmData = {
   updated_at: string;
 };
 
+const LEVEL = 9;
+
 const fallback: ThmData = {
   username: "mrhamad",
   profile_url: "https://tryhackme.com/p/mrhamad",
@@ -36,7 +38,7 @@ export default function TryHackMeSection() {
     { value: data.rank ?? "—", label: "Rank" },
     { value: data.badges ?? "—", label: "Badges" },
     { value: data.completed_rooms ?? "—", label: "Completed rooms" },
-    { value: 9, label: "Level" },
+    { value: LEVEL, label: "Level" },
   ];
 
   return (
