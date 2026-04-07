@@ -28,6 +28,30 @@ const certifications = [
     skills: ["Risk Management", "Cryptography", "Identity Management", "Network Security"],
     link: "#",
   },
+  {
+    name: "Cyber Security 101",
+    issuer: "TryHackMe",
+    date: "2025",
+    status: "Completed",
+    color: "text-primary",
+    bg: "bg-primary/10 border-primary/30",
+    description:
+      "Foundational cyber security path covering core concepts including networking, Linux, web security, and defensive/offensive security fundamentals.",
+    skills: ["Networking", "Linux", "Web Security", "Offensive Security", "Defensive Security"],
+    link: "https://tryhackme-certificates.s3-eu-west-1.amazonaws.com/THM-SFOFNHOPWH.pdf",
+  },
+  {
+    name: "Pre Security (Legacy)",
+    issuer: "TryHackMe",
+    date: "2025",
+    status: "Completed",
+    color: "text-primary",
+    bg: "bg-primary/10 border-primary/30",
+    description:
+      "Entry-level learning path introducing the technical knowledge required to start a career in cyber security, covering networking, the web, and Linux basics.",
+    skills: ["Networking", "Linux", "Web Fundamentals", "How the Web Works"],
+    link: "https://tryhackme-certificates.s3-eu-west-1.amazonaws.com/THM-KJO06LY7XU.pdf",
+  },
 ];
 
 export default function CertificationsSection() {
