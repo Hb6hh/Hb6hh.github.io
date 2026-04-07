@@ -10,9 +10,10 @@ type ThmData = {
   rank: number | null;
   badges: number | null;
   completed_rooms: number | null;
-  points: number | null;
   updated_at: string;
 };
+
+const LEVEL = 9;
 
 const fallback: ThmData = {
   username: "mrhamad",
@@ -20,7 +21,6 @@ const fallback: ThmData = {
   rank: 119819,
   badges: 17,
   completed_rooms: 90,
-  points: null,
   updated_at: new Date().toISOString(),
 };
 
@@ -38,7 +38,7 @@ export default function TryHackMeSection() {
     { value: data.rank ?? "—", label: "Rank" },
     { value: data.badges ?? "—", label: "Badges" },
     { value: data.completed_rooms ?? "—", label: "Completed rooms" },
-    { value: data.points ?? "—", label: "Points" },
+    { value: LEVEL, label: "Level" },
   ];
 
   return (
