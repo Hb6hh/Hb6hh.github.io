@@ -5,18 +5,6 @@ import { Award, ExternalLink, CheckCircle } from "lucide-react";
 
 const certifications = [
   {
-    name: "Google Cybersecurity Certificate",
-    issuer: "Google / Coursera",
-    date: "2025",
-    status: "Completed",
-    color: "text-primary",
-    bg: "bg-primary/10 border-primary/30",
-    description:
-      "Comprehensive program covering threat detection, network security, incident response, and the use of SIEM tools like Chronicle and Splunk.",
-    skills: ["SIEM", "Threat Detection", "Network Security", "Incident Response", "Python"],
-    link: "#",
-  },
-  {
     name: "Cyber Security 101",
     issuer: "TryHackMe",
     date: "2026",
@@ -40,18 +28,62 @@ const certifications = [
     skills: ["Linux", "Networking", "Security Basics"],
     link: "https://tryhackme-certificates.s3-eu-west-1.amazonaws.com/THM-KJO06LY7XU.pdf",
   },
-  {
-    name: "CompTIA Security+",
-    issuer: "CompTIA",
-    date: "In Progress",
-    status: "In Progress",
-    color: "text-accent",
-    bg: "bg-accent/10 border-accent/30",
-    description:
-      "Industry-standard certification covering core security functions and skills required to pursue an IT security career.",
-    skills: ["Risk Management", "Cryptography", "Identity Management", "Network Security"],
-    link: "#",
-  },
+
+{
+  name: "Fundamentals of Programming & Problem Solving",
+  issuer: "TryHackMe",
+  date: "In Progress",
+  status: "In Progress",
+  color: "text-accent",
+  bg: "bg-accent/10 border-accent/30",
+  description: "In-progress learning path focused on core programming fundamentals and problem-solving skills.",
+  skills: ["Programming", "Problem Solving", "Logic"],
+  link: "#",
+},
+{
+  name: "Jr Penetration Tester",
+  issuer: "TryHackMe",
+  date: "In Progress",
+  status: "In Progress",
+  color: "text-accent",
+  bg: "bg-accent/10 border-accent/30",
+  description: "In-progress path covering practical junior pentesting skills and common attack techniques.",
+  skills: ["Recon", "Web", "Exploitation"],
+  link: "#",
+},
+{
+  name: "Red Teaming",
+  issuer: "TryHackMe",
+  date: "In Progress",
+  status: "In Progress",
+  color: "text-accent",
+  bg: "bg-accent/10 border-accent/30",
+  description: "In-progress path focused on adversary emulation, tradecraft, and red team methodology.",
+  skills: ["Red Team", "Active Directory", "OPSEC"],
+  link: "#",
+},
+{
+  name: "Security Engineer",
+  issuer: "TryHackMe",
+  date: "In Progress",
+  status: "In Progress",
+  color: "text-accent",
+  bg: "bg-accent/10 border-accent/30",
+  description: "In-progress path focused on building, hardening, and operating secure systems.",
+  skills: ["Hardening", "Defense", "Monitoring"],
+  link: "#",
+},
+{
+  name: "SOC Level 1",
+  issuer: "TryHackMe",
+  date: "In Progress",
+  status: "In Progress",
+  color: "text-accent",
+  bg: "bg-accent/10 border-accent/30",
+  description: "In-progress path covering SOC fundamentals: alert triage, investigations, and incident response basics.",
+  skills: ["SOC", "Alert Triage", "Incident Response"],
+  link: "#",
+},  
 ];
 
 export default function CertificationsSection() {
